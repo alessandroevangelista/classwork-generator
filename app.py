@@ -14,7 +14,6 @@ LABELS = ['A', 'B', 'C', 'D']
 
 st.set_page_config(page_title="Generatore Verifiche", page_icon="📝", layout="centered")
 
-# ── Sidebar navigation ──────────────────────────────────────────────────────
 st.sidebar.title("📚 Navigazione")
 page = st.sidebar.radio("Vai a:", ["🖨️ Genera Verifica", "🗃️ Crea Database"])
 
@@ -25,7 +24,6 @@ if page == "🖨️ Genera Verifica":
     st.title("🖨️ Genera Verifica")
     st.markdown("Carica il tuo database JSON, configura la verifica e scarica i PDF.")
 
-    # ── Upload JSON ──────────────────────────────────────────────────────────
     uploaded = st.file_uploader("📂 Carica il database domande (JSON)", type="json")
 
     if uploaded is None:
@@ -44,12 +42,9 @@ if page == "🖨️ Genera Verifica":
 
     total = len(all_questions)
     st.success(f"✅ Database caricato: **{total} domande** disponibili.")
-
     st.divider()
 
-    # ── Form configurazione ──────────────────────────────────────────────────
     st.subheader("⚙️ Configura la verifica")
-
     col1, col2 = st.columns(2)
     with col1:
         materia = st.text_input("Materia", placeholder="es. Fisica - Magnetismo")
@@ -64,7 +59,6 @@ if page == "🖨️ Genera Verifica":
 
     st.divider()
 
-    # ── Generate PDFs ────────────────────────────────────────────────────────
     if st.button("📄 Genera PDF", type="primary", use_container_width=True):
         if not materia.strip():
             st.warning("Inserisci il nome della materia.")
@@ -73,26 +67,16 @@ if page == "🖨️ Genera Verifica":
         def build_pdf(questions, n_dom, mat, data_ver):
             buffer = io.BytesIO()
             selected = random.sample(questions, n_dom)
-
-            doc = SimpleDocTemplate(
-                buffer,
-                pagesize=A4,
-                rightMargin=2*cm,
-                leftMargin=2*cm,
-                topMargin=2.5*cm,
-                bottomMargin=2.5*cm
-            )
-
+            doc = SimpleDocTemplate(buffer, pagesize=A4,
+                rightMargin=2*cm, leftMargin=2*cm,
+                topMargin=2.5*cm, bottomMargin=2.5*cm)
             styles = getSampleStyleSheet()
-
             title_style = ParagraphStyle('Title', parent=styles['Normal'],
                 fontSize=18, fontName='Helvetica-Bold',
-                textColor=colors.HexColor('#1a365d'),
-                alignment=TA_CENTER, spaceAfter=4)
+                textColor=colors.HexColor('#1a365d'), alignment=TA_CENTER, spaceAfter=4)
             subtitle_style = ParagraphStyle('Subtitle', parent=styles['Normal'],
                 fontSize=10, fontName='Helvetica',
-                textColor=colors.HexColor('#718096'),
-                alignment=TA_CENTER, spaceAfter=20)
+                textColor=colors.HexColor('#718096'), alignment=TA_CENTER, spaceAfter=20)
             nome_style = ParagraphStyle('Nome', parent=styles['Normal'],
                 fontSize=11, fontName='Helvetica',
                 textColor=colors.HexColor('#2d3748'), spaceAfter=4)
@@ -106,7 +90,6 @@ if page == "🖨️ Genera Verifica":
                 fontSize=10, fontName='Helvetica',
                 textColor=colors.HexColor('#4a5568'),
                 leftIndent=12, spaceAfter=3, leading=14)
-
             story = []
             story.append(Paragraph(f"Verifica di {mat}", title_style))
             story.append(Paragraph(data_ver, subtitle_style))
@@ -114,11 +97,9 @@ if page == "🖨️ Genera Verifica":
             story.append(Spacer(1, 0.4*cm))
             story.append(Paragraph("Nome Cognome: _____________________________________________", nome_style))
             story.append(Spacer(1, 0.4*cm))
-
             for idx, q in enumerate(selected):
                 answers = list(q['risposte'].items())
                 random.shuffle(answers)
-
                 block = []
                 block.append(Paragraph(f"DOMANDA {idx + 1}", q_num_style))
                 block.append(Paragraph(q['domanda'], q_text_style))
@@ -128,14 +109,12 @@ if page == "🖨️ Genera Verifica":
                 block.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#e2e8f0')))
                 block.append(Spacer(1, 0.3*cm))
                 story.append(KeepTogether(block))
-
             def add_page_number(canvas, doc):
                 canvas.saveState()
                 canvas.setFont('Helvetica', 9)
                 canvas.setFillColor(colors.HexColor('#718096'))
                 canvas.drawCentredString(A4[0] / 2, 1.2*cm, f"Pagina {canvas.getPageNumber()}")
                 canvas.restoreState()
-
             doc.build(story, onFirstPage=add_page_number, onLaterPages=add_page_number)
             buffer.seek(0)
             return buffer
@@ -150,7 +129,6 @@ if page == "🖨️ Genera Verifica":
         progress.empty()
         st.success(f"✅ {n_copie} {'copia generata' if n_copie == 1 else 'copie generate'}!")
 
-        # Pack all PDFs into a single ZIP
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
             for filename, buf in pdf_files:
@@ -173,18 +151,72 @@ if page == "🖨️ Genera Verifica":
 # ════════════════════════════════════════════════════════════════════════════
 elif page == "🗃️ Crea Database":
     st.title("🗃️ Crea Database Domande")
-    st.markdown("Inserisci le domande e scarica il file JSON. Le domande **non vengono salvate** sul server.")
+    st.markdown("Le domande **non vengono salvate** sul server: scarica sempre il JSON prima di chiudere.")
 
-    # Inizializza session state
     if "domande" not in st.session_state:
         st.session_state.domande = []
+    if "db_inizializzato" not in st.session_state:
+        st.session_state.db_inizializzato = False
+    if "import_processed" not in st.session_state:
+        st.session_state.import_processed = None
+
+    # ── Scelta iniziale ──────────────────────────────────────────────────────
+    if not st.session_state.db_inizializzato:
+        st.subheader("Come vuoi iniziare?")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if st.button("✏️ Nuovo database vuoto", use_container_width=True, type="primary"):
+                st.session_state.domande = []
+                st.session_state.db_inizializzato = True
+                st.session_state.import_processed = None
+                st.rerun()
+
+        with col2:
+            st.markdown("**Carica un JSON esistente**")
+            uploaded_init = st.file_uploader("Scegli file JSON", type="json", key="upload_init")
+            if uploaded_init is not None:
+                file_id = uploaded_init.name + str(uploaded_init.size)
+                if st.session_state.import_processed != file_id:
+                    try:
+                        imported = json.load(uploaded_init)
+                        imported_list = imported.get("quiz", imported) if isinstance(imported, dict) else imported
+                        domande_caricate = []
+                        for idx, q in enumerate(imported_list):
+                            if "domanda" in q and "risposte" in q:
+                                domande_caricate.append({
+                                    "id": idx + 1,
+                                    "domanda": q["domanda"],
+                                    "risposte": q["risposte"]
+                                })
+                        st.session_state.domande = domande_caricate
+                        st.session_state.db_inizializzato = True
+                        st.session_state.import_processed = file_id
+                        st.success(f"Caricate {len(domande_caricate)} domande!")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Errore nel leggere il file: {e}")
+        st.stop()
+
+    # ── Da qui il db è inizializzato ─────────────────────────────────────────
+    n = len(st.session_state.domande)
+    col_info, col_reset = st.columns([3, 1])
+    with col_info:
+        st.info(f"📋 Database attivo: **{n} domande**")
+    with col_reset:
+        if st.button("🔄 Ricomincia", type="secondary", use_container_width=True):
+            st.session_state.db_inizializzato = False
+            st.session_state.domande = []
+            st.session_state.import_processed = None
+            st.rerun()
+
+    st.divider()
 
     # ── Form nuova domanda ───────────────────────────────────────────────────
     st.subheader("➕ Aggiungi una domanda")
 
     with st.form("form_domanda", clear_on_submit=True):
         testo_domanda = st.text_area("Testo della domanda", placeholder="Scrivi qui la domanda...")
-
         st.markdown("**Risposte** (inserisci almeno 2)")
         col1, col2 = st.columns(2)
         with col1:
@@ -201,7 +233,6 @@ elif page == "🗃️ Crea Database":
             for label, testo in [("A", r_a), ("B", r_b), ("C", r_c), ("D", r_d)]:
                 if testo.strip():
                     risposte[label] = testo.strip()
-
             if not testo_domanda.strip():
                 st.error("Inserisci il testo della domanda.")
             elif len(risposte) < 2:
@@ -217,13 +248,9 @@ elif page == "🗃️ Crea Database":
 
     st.divider()
 
-    # ── Lista domande inserite ───────────────────────────────────────────────
-    n = len(st.session_state.domande)
-    if n == 0:
-        st.info("Nessuna domanda ancora inserita.")
-    else:
-        st.subheader(f"📋 Domande inserite: {n}")
-
+    # ── Lista domande ────────────────────────────────────────────────────────
+    if n > 0:
+        st.subheader(f"📋 Domande nel database: {n}")
         for i, q in enumerate(st.session_state.domande):
             with st.expander(f"**{q['id']}.** {q['domanda'][:80]}{'...' if len(q['domanda']) > 80 else ''}"):
                 st.markdown(f"**Domanda:** {q['domanda']}")
@@ -231,34 +258,9 @@ elif page == "🗃️ Crea Database":
                     st.markdown(f"- **{label}.** {testo}")
                 if st.button(f"🗑️ Elimina domanda {q['id']}", key=f"del_{i}"):
                     st.session_state.domande.pop(i)
-                    # Ricalcola gli id
                     for j, d in enumerate(st.session_state.domande):
                         d['id'] = j + 1
                     st.rerun()
-
-        st.divider()
-
-        # ── Import da JSON esistente ─────────────────────────────────────────
-        st.subheader("📂 Importa da JSON esistente")
-        uploaded_db = st.file_uploader("Carica un JSON esistente per aggiungere domande", type="json", key="import_db")
-        if uploaded_db:
-            try:
-                imported = json.load(uploaded_db)
-                imported_list = imported.get("quiz", imported) if isinstance(imported, dict) else imported
-                start_id = len(st.session_state.domande) + 1
-                added = 0
-                for q in imported_list:
-                    if "domanda" in q and "risposte" in q:
-                        st.session_state.domande.append({
-                            "id": start_id + added,
-                            "domanda": q["domanda"],
-                            "risposte": q["risposte"]
-                        })
-                        added += 1
-                st.success(f"Importate {added} domande!")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Errore nell'importare il file: {e}")
 
         st.divider()
 
@@ -277,7 +279,5 @@ elif page == "🗃️ Crea Database":
                 mime="application/json",
                 use_container_width=True
             )
-
-        if st.button("🗑️ Svuota tutto il database", type="secondary", use_container_width=True):
-            st.session_state.domande = []
-            st.rerun()
+    else:
+        st.info("Nessuna domanda ancora inserita. Usa il form qui sopra per aggiungerne.")
