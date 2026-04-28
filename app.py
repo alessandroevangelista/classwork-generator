@@ -10,7 +10,7 @@ from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 
-LABELS = ['A', 'B', 'C', 'D']
+LABELS = ['A', 'B', 'C', 'D']Do
 
 st.set_page_config(page_title="Generatore Verifiche", page_icon="📝", layout="centered")
 
@@ -102,7 +102,7 @@ if page == "🖨️ Genera Verifica":
                 random.shuffle(answers)
                 block = []
                 block.append(Paragraph(f"DOMANDA {idx + 1}", q_num_style))
-                block.append(Paragraph(q['domanda'], q_text_style))
+                block.append(Paragraph(f"{idx + 1} " q['domanda'], q_text_style))
                 for i, (_, testo) in enumerate(answers):
                     block.append(Paragraph(f"<b>{LABELS[i]}.</b>  {testo}", ans_style))
                 block.append(Spacer(1, 0.5*cm))
