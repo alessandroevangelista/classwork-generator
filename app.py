@@ -84,10 +84,10 @@ if page == "🖨️ Genera Verifica":
                 fontSize=8, fontName='Helvetica-Bold',
                 textColor=colors.HexColor('#2b6cb0'), spaceAfter=3)
             q_text_style = ParagraphStyle('QText', parent=styles['Normal'],
-                fontSize=10.5, fontName='Helvetica-Bold',
+                fontSize=8, fontName='Helvetica-Bold',
                 textColor=colors.HexColor('#2d3748'), spaceAfter=6, leading=15)
             ans_style = ParagraphStyle('Ans', parent=styles['Normal'],
-                fontSize=10, fontName='Helvetica',
+                fontSize=8, fontName='Helvetica',
                 textColor=colors.HexColor('#4a5568'),
                 leftIndent=12, spaceAfter=3, leading=14)
             story = []
