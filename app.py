@@ -102,7 +102,7 @@ if page == "🖨️ Genera Verifica":
                 random.shuffle(answers)
                 block = []
                 # block.append(Paragraph(f"DOMANDA {idx + 1}", q_num_style))
-                block.append(Paragraph(f"{idx + 1} " q['domanda'], q_text_style))
+                block.append(Paragraph(f"{idx + 1} {q['domanda']}", q_text_style))
                 for i, (_, testo) in enumerate(answers):
                     block.append(Paragraph(f"<b>{LABELS[i]}.</b>  {testo}", ans_style))
                 block.append(Spacer(1, 0.1*cm))
