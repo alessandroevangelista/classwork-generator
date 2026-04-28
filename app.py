@@ -3,7 +3,6 @@ import random
 import json
 import io
 import zipfile
-from pypdf import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable, KeepTogether
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -118,21 +117,6 @@ if page == "🖨️ Genera Verifica":
                 canvas.drawCentredString(A4[0] / 2, 1.2*cm, f"Pagina {canvas.getPageNumber()}")
                 canvas.restoreState()
             doc.build(story, onFirstPage=add_page_number, onLaterPages=add_page_number)
-
-            # Se il numero di pagine è dispari, aggiungi una pagina bianca finale
-            buffer.seek(0)
-            reader = PdfReader(buffer)
-            num_pages = len(reader.pages)
-            if num_pages % 2 != 0:
-                writer = PdfWriter()
-                for page in reader.pages:
-                    writer.add_page(page)
-                writer.add_blank_page()
-                final_buffer = io.BytesIO()
-                writer.write(final_buffer)
-                final_buffer.seek(0)
-                return final_buffer
-
             buffer.seek(0)
             return buffer
 
