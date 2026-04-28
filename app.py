@@ -93,7 +93,7 @@ if page == "🖨️ Genera Verifica":
             story = []
             story.append(Paragraph(f"Verifica di {mat}", title_style))
             story.append(Paragraph(data_ver, subtitle_style))
-            story.append(Paragraph(f"Risolvi i due esercizi e rispondi alle 25 domande, ogni domanda ammette una sola risposta corretta, ogni risposta esatta vale un punto mentre una risposta sbagliata o una non data vale zero punti", subtitle_style))
+            story.append(Paragraph(f"Rispondi alle 25 domande, ogni domanda ammette una sola risposta corretta, ogni risposta esatta vale un punto mentre una risposta sbagliata o una non data vale zero punti. Risolvi i due esercizi", subtitle_style))
             story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#2b6cb0')))
             story.append(Spacer(1, 0.4*cm))
             story.append(Paragraph("Nome Cognome: _____________________________________________", nome_style))
