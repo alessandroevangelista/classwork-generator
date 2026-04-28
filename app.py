@@ -57,10 +57,6 @@ if page == "🖨️ Genera Verifica":
     with col4:
         n_copie = st.number_input("Numero di copie diverse", min_value=1, max_value=50, value=1)
 
-    col5 = st.columns(1)
-    with col5:
-        istruzioni = st.number_input("Istruzioni e indicazioni", min_value=1, max_value=250, value=1)
-
     st.divider()
 
     if st.button("📄 Genera PDF", type="primary", use_container_width=True):
@@ -68,7 +64,7 @@ if page == "🖨️ Genera Verifica":
             st.warning("Inserisci il nome della materia.")
             st.stop()
 
-        def build_pdf(questions, n_dom, mat, data_ver, istruzioni):
+        def build_pdf(questions, n_dom, mat, data_ver):
             buffer = io.BytesIO()
             selected = random.sample(questions, n_dom)
             doc = SimpleDocTemplate(buffer, pagesize=A4,
@@ -97,7 +93,7 @@ if page == "🖨️ Genera Verifica":
             story = []
             story.append(Paragraph(f"Verifica di {mat}", title_style))
             story.append(Paragraph(data_ver, subtitle_style))
-            story.append(Paragraph(istruzioni, subtitle_style))
+            story.append(Paragraph(f"Risolvi i due esercizi e rispondi alle 25 domande, ogni domanda ammette una sola risposta corretta, ogni risposta esatta vale un punto mentre una risposta sbagliata o una non data vale zero punti", subtitle_style))
             story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#2b6cb0')))
             story.append(Spacer(1, 0.4*cm))
             story.append(Paragraph("Nome Cognome: _____________________________________________", nome_style))
@@ -127,7 +123,7 @@ if page == "🖨️ Genera Verifica":
         progress = st.progress(0, text="Generazione in corso...")
         pdf_files = []
         for i in range(n_copie):
-            buf = build_pdf(all_questions, n_domande, materia.strip(), data_verifica.strip(), istruzioni)
+            buf = build_pdf(all_questions, n_domande, materia.strip(), data_verifica.strip())
             pdf_files.append((f"verifica_{materia.strip().replace(' ', '_')}_copia{i+1}.pdf", buf))
             progress.progress((i + 1) / n_copie, text=f"Generata copia {i+1} di {n_copie}...")
 
