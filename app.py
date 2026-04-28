@@ -101,13 +101,13 @@ if page == "🖨️ Genera Verifica":
                 answers = list(q['risposte'].items())
                 random.shuffle(answers)
                 block = []
-                block.append(Paragraph(f"DOMANDA {idx + 1}", q_num_style))
+                # block.append(Paragraph(f"DOMANDA {idx + 1}", q_num_style))
                 block.append(Paragraph(f"{idx + 1} " q['domanda'], q_text_style))
                 for i, (_, testo) in enumerate(answers):
                     block.append(Paragraph(f"<b>{LABELS[i]}.</b>  {testo}", ans_style))
-                block.append(Spacer(1, 0.5*cm))
+                block.append(Spacer(1, 0.1*cm))
                 block.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#e2e8f0')))
-                block.append(Spacer(1, 0.3*cm))
+                block.append(Spacer(1, 0.1*cm))
                 story.append(KeepTogether(block))
             def add_page_number(canvas, doc):
                 canvas.saveState()
