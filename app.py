@@ -10,7 +10,7 @@ from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 
-LABELS = ['A', 'B', 'C', 'D']Do
+LABELS = ['A', 'B', 'C', 'D']
 
 st.set_page_config(page_title="Generatore Verifiche", page_icon="📝", layout="centered")
 
